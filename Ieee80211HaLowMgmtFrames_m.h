@@ -34,6 +34,10 @@ namespace ieee80211 {
  * Struct generated from inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrames.msg:45 by nedtool.
  */
 
+
+
+
+
 class Ieee80211HaLowAssociationResponseFrameBody : public ::inet::ieee80211::Ieee80211FrameBody
 {
   protected:
@@ -66,8 +70,8 @@ class Ieee80211HaLowAssociationResponseFrameBody : public ::inet::ieee80211::Iee
     virtual Ieee80211SupportedRatesElement& getSupportedRates();
     virtual const Ieee80211SupportedRatesElement& getSupportedRates() const {return const_cast<Ieee80211HaLowAssociationResponseFrameBody*>(this)->getSupportedRates();}
     virtual void setSupportedRates(const Ieee80211SupportedRatesElement& supportedRates);
-     virtual uint64_t getassociationID() const;
-      virtual void setassociationID(uint64_t AssociationIdentifier);
+    virtual uint64_t getassociationID() const;
+    virtual void setassociationID(uint64_t AssociationIdentifier);
 };
 
 inline void doPacking(cCommBuffer *b, Ieee80211HaLowAssociationResponseFrameBody& obj) {obj.parsimPack(b);}

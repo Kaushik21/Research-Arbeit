@@ -19,6 +19,8 @@
 
 USING_NAMESPACE
 
+//using namespace std;
+
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -37,6 +39,8 @@ namespace inet {
 namespace ieee80211 {
 
 
+
+
 Register_Class(Ieee80211HaLowAssociationResponseFrameBody);
 
 Ieee80211HaLowAssociationResponseFrameBody::Ieee80211HaLowAssociationResponseFrameBody() : ::inet::ieee80211::Ieee80211FrameBody()
@@ -45,6 +49,7 @@ Ieee80211HaLowAssociationResponseFrameBody::Ieee80211HaLowAssociationResponseFra
 
     this->statusCode_var = 0;
     this->aid_var = 0;
+    this->AssociationID_var = 0;
 }
 
 Ieee80211HaLowAssociationResponseFrameBody::Ieee80211HaLowAssociationResponseFrameBody(const Ieee80211HaLowAssociationResponseFrameBody& other) : ::inet::ieee80211::Ieee80211FrameBody(other)
@@ -121,7 +126,7 @@ void Ieee80211HaLowAssociationResponseFrameBody::setSupportedRates(const Ieee802
     this->supportedRates_var = supportedRates;
 }
 
-int Ieee80211HaLowAssociationResponseFrameBody::getassociationID() const
+uint64_t Ieee80211HaLowAssociationResponseFrameBody::getassociationID() const
 {
     return AssociationID_var;
 }
@@ -287,8 +292,8 @@ std::string Ieee80211HaLowAssociationResponseFrameBodyDescriptor::getFieldAsStri
     switch (field) {
         case 0: return long2string(pp->getStatusCode());
         case 1: return long2string(pp->getAid());
-        case 2: return long2string(pp->getassociationID());
-        case 3: {std::stringstream out; out << pp->getSupportedRates(); return out.str();}
+        case 2: {std::stringstream out; out << pp->getSupportedRates(); return out.str();}
+        case 3: return uint642string(pp->getassociationID());
         //case 3: return long2string(pp->getassociationID());
         default: return "";
     }
@@ -306,7 +311,7 @@ bool Ieee80211HaLowAssociationResponseFrameBodyDescriptor::setFieldAsString(void
     switch (field) {
         case 0: pp->setStatusCode(string2long(value)); return true;
         case 1: pp->setAid(string2long(value)); return true;
-        case 2: pp->getassociationID(string2long(value)); return true;
+        case 2: pp->setassociationID(string2uint64(value)); return true;
         default: return false;
     }
 }
@@ -320,7 +325,7 @@ const char *Ieee80211HaLowAssociationResponseFrameBodyDescriptor::getFieldStruct
         field -= basedesc->getFieldCount(object);
     }
     switch (field) {
-        case 3: return opp_typename(typeid(Ieee80211SupportedRatesElement));
+        case 2: return opp_typename(typeid(Ieee80211SupportedRatesElement));
         default: return NULL;
     };
 }
@@ -532,9 +537,9 @@ std::string Ieee80211HaLowAssociationResponseFrameDescriptor::getFieldAsString(v
     }
     Ieee80211HaLowAssociationResponseFrame *pp = (Ieee80211HaLowAssociationResponseFrame *)object; (void)pp;
     switch (field) {
-        case 0: {std::stringstream out; out << pp->getBody(); return out.str();}
-        default: return "";
-    }
+            case 0: {std::stringstream out; out << pp->getBody(); return out.str();}
+            default: return "";
+        }
 }
 
 bool Ieee80211HaLowAssociationResponseFrameDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
