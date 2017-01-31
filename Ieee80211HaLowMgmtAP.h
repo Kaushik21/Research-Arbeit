@@ -44,7 +44,7 @@ public:
         enum TIMGROUP { TIM1,TIM2,TIM3,TIM4,TIM5,TIM6,TIM7,TIM8};
         enum PAGEGROUP {PAGE1,PAGE2,PAGE3,PAGE4};
         enum STAStatus { NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED };
-        uint64_t getassociationID(Ieee80211AuthenticationFrame *frame);
+        uint64_t getassociationID(Ieee80211HaLowAuthenticationFrame *frame);
 
         struct HaLowSTAInfo
             {
@@ -93,15 +93,22 @@ protected:
 
               /** Called by the signal handler whenever a change occurs we're interested in */
               virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value DETAILS_ARG) override;
-
+              virtual void sendBeacon();
          /** Utility function: set fields in the given frame and send it out to the address */
         virtual void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& destAddr);
         virtual HaLowSTAInfo *lookupHaLowSenderSTA(Ieee80211ManagementFrame *frame);
-        virtual void handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame);
-        virtual void handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame);
-        virtual void handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame);
-        virtual void handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame) ;
+        virtual void handleAuthenticationFrame(Ieee80211HaLowAuthenticationFrame *frame);
+        virtual void handleDeauthenticationFrame(Ieee80211HaLowDeauthenticationFrame *frame);
+        virtual void handleAssociationRequestFrame(Ieee80211HaLowAssociationRequestFrame *frame);
+        virtual void handleReassociationRequestFrame(Ieee80211HaLowReassociationRequestFrame *frame) ;
         /**virtual void handleDisassociationFrame(Ieee80211DisassociationFrame *frame) override;**/
+        virtual void handleDisassociationFrame(Ieee80211HaLowDisassociationFrame *frame) ;
+        virtual void handleBeaconFrame(Ieee80211HaLowBeaconFrame *frame) ;
+        virtual void handleProbeRequestFrame(Ieee80211HaLowProbeRequestFrame *frame) ;
+        virtual void handleProbeResponseFrame(Ieee80211HaLowProbeResponseFrame *frame) ;
+        virtual void handleReassociationResponseFrame(Ieee80211HaLowReassociationResponseFrame *frame);
+
+        //Have to add send beacon function along with other frames
 
 
         void sendAssocNotification(const MACAddress& addr);

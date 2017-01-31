@@ -73,6 +73,24 @@ void Ieee80211HaLowMgmtAP::receiveSignal(cComponent *source, simsignal_t signalI
 }
 
 
+void Ieee80211HaLowMgmtAP::sendBeacon()
+{
+    EV << "Sending beacon\n";
+    Ieee80211HaLowBeaconFrame *frame = new Ieee80211HaLowBeaconFrame("Beacon");
+    Ieee80211BeaconFrameBody& body = frame->getBody();
+    body.setSSID(ssid.c_str());
+    body.setSupportedRates(supportedRates);
+    body.setBeaconInterval(beaconInterval);
+    body.setChannelNumber(channelNumber);
+    body.setBodyLength(8 + 2 + 2 + (2 + ssid.length()) + (2 + supportedRates.numRates));
+
+    frame->setByteLength(18 + body.getBodyLength());
+    frame->setReceiverAddress(MACAddress::BROADCAST_ADDRESS);
+    frame->setFromDS(true);
+
+    sendDown(frame);
+}
+
 
 Ieee80211HaLowMgmtAP::HaLowSTAInfo *Ieee80211HaLowMgmtAP::lookupHaLowSenderSTA(Ieee80211ManagementFrame *frame)
 {
@@ -105,7 +123,7 @@ void Ieee80211HaLowMgmtAP::sendDisAssocNotification(const MACAddress& addr)
     emit(NF_L2_AP_DISASSOCIATED, &notif);
 }
 
-void Ieee80211HaLowMgmtAP :: handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
+void Ieee80211HaLowMgmtAP :: handleAuthenticationFrame(Ieee80211HaLowAuthenticationFrame *frame)
 {
     static int STAcount = 0;
     int frameAuthSeq = frame->getBody().getSequenceNumber();
@@ -191,7 +209,7 @@ void Ieee80211HaLowMgmtAP :: handleAuthenticationFrame(Ieee80211AuthenticationFr
             // wrong sequence number: send error and return
             EV << "Wrong sequence number, " << sta->authSeqExpected << " expected\n";
 
-            Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame("Auth-ERROR");
+            Ieee80211HaLowAuthenticationFrame *resp = new Ieee80211HaLowAuthenticationFrame("Auth-ERROR");
             resp->getBody().setStatusCode(SC_AUTH_OUT_OF_SEQ);
             sendManagementFrame(resp, frame->getTransmitterAddress());
             delete frame;
@@ -205,7 +223,7 @@ void Ieee80211HaLowMgmtAP :: handleAuthenticationFrame(Ieee80211AuthenticationFr
         // send OK response (we don't model the cryptography part, just assume
         // successful authentication every time)
         EV << "Sending Authentication frame, seqNum=" << (frameAuthSeq + 1) << "\n";
-        Ieee80211AuthenticationFrame *resp = new Ieee80211AuthenticationFrame(isLast ? "Auth-OK" : "Auth");
+        Ieee80211HaLowAuthenticationFrame *resp = new Ieee80211HaLowAuthenticationFrame(isLast ? "Auth-OK" : "Auth");
         resp->getBody().setSequenceNumber(frameAuthSeq + 1);
         resp->getBody().setStatusCode(SC_SUCCESSFUL);
         resp->getBody().setIsLast(isLast);
@@ -229,7 +247,7 @@ void Ieee80211HaLowMgmtAP :: handleAuthenticationFrame(Ieee80211AuthenticationFr
 }
 
 
-void Ieee80211HaLowMgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame *frame)
+void Ieee80211HaLowMgmtAP::handleDeauthenticationFrame(Ieee80211HaLowDeauthenticationFrame *frame)
 {
     EV << "Processing Deauthentication frame\n";
 
@@ -246,7 +264,7 @@ void Ieee80211HaLowMgmtAP::handleDeauthenticationFrame(Ieee80211Deauthentication
     }
 }
 
-void Ieee80211HaLowMgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestFrame *frame)
+void Ieee80211HaLowMgmtAP::handleAssociationRequestFrame(Ieee80211HaLowAssociationRequestFrame *frame)
 {
     EV << "Processing AssociationRequest frame\n";
 
@@ -255,7 +273,7 @@ void Ieee80211HaLowMgmtAP::handleAssociationRequestFrame(Ieee80211AssociationReq
         HaLowSTAInfo *sta = lookupHaLowSenderSTA(frame);
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
-        Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
+        Ieee80211HaLowDeauthenticationFrame *resp = new Ieee80211HaLowDeauthenticationFrame("Deauth");
         resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
@@ -284,7 +302,7 @@ void Ieee80211HaLowMgmtAP::handleAssociationRequestFrame(Ieee80211AssociationReq
 
 
 
-void Ieee80211HaLowMgmtAP::handleReassociationRequestFrame(Ieee80211ReassociationRequestFrame *frame)
+void Ieee80211HaLowMgmtAP::handleReassociationRequestFrame(Ieee80211HaLowReassociationRequestFrame *frame)
 {
     EV << "Processing ReassociationRequest frame\n";
 
@@ -293,7 +311,7 @@ void Ieee80211HaLowMgmtAP::handleReassociationRequestFrame(Ieee80211Reassociatio
         HaLowSTAInfo *sta = lookupHaLowSenderSTA(frame);
     if (!sta || sta->status == NOT_AUTHENTICATED) {
         // STA not authenticated: send error and return
-        Ieee80211DeauthenticationFrame *resp = new Ieee80211DeauthenticationFrame("Deauth");
+        Ieee80211HaLowDeauthenticationFrame *resp = new Ieee80211HaLowDeauthenticationFrame("Deauth");
         resp->getBody().setReasonCode(RC_NONAUTH_ASS_REQUEST);
         sendManagementFrame(resp, frame->getTransmitterAddress());
         delete frame;
@@ -306,7 +324,7 @@ void Ieee80211HaLowMgmtAP::handleReassociationRequestFrame(Ieee80211Reassociatio
     sta->status = ASSOCIATED;    // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
-    Ieee80211ReassociationResponseFrame *resp = new Ieee80211ReassociationResponseFrame("ReassocResp-OK");
+    Ieee80211HaLowReassociationResponseFrame *resp = new Ieee80211HaLowReassociationResponseFrame("ReassocResp-OK");
     Ieee80211ReassociationResponseFrameBody& body = resp->getBody();
     body.setStatusCode(SC_SUCCESSFUL);
     body.setAid(0);    //XXX
@@ -315,7 +333,61 @@ void Ieee80211HaLowMgmtAP::handleReassociationRequestFrame(Ieee80211Reassociatio
 }
 
 
-uint64_t Ieee80211HaLowMgmtAP:: getassociationID(Ieee80211AuthenticationFrame *frame)
+void Ieee80211HaLowMgmtAP::handleReassociationResponseFrame(Ieee80211HaLowReassociationResponseFrame *frame)
+{
+    dropManagementFrame(frame);
+}
+
+void Ieee80211HaLowMgmtAP::handleDisassociationFrame(Ieee80211HaLowDisassociationFrame *frame)
+{
+    // create STA entry if needed
+            HaLowSTAInfo *sta = lookupHaLowSenderSTA(frame);
+
+    delete frame;
+
+    if (sta) {
+        if (sta->status == ASSOCIATED)
+            sendDisAssocNotification(sta->address);
+        sta->status = AUTHENTICATED;
+    }
+}
+
+void Ieee80211HaLowMgmtAP::handleBeaconFrame(Ieee80211HaLowBeaconFrame *frame)
+{
+    dropManagementFrame(frame);
+}
+
+void Ieee80211HaLowMgmtAP::handleProbeRequestFrame(Ieee80211HaLowProbeRequestFrame *frame)
+{
+    EV << "Processing ProbeRequest frame\n";
+
+    if (strcmp(frame->getBody().getSSID(), "") != 0 && strcmp(frame->getBody().getSSID(), ssid.c_str()) != 0) {
+        EV << "SSID `" << frame->getBody().getSSID() << "' does not match, ignoring frame\n";
+        dropManagementFrame(frame);
+        return;
+    }
+
+    MACAddress staAddress = frame->getTransmitterAddress();
+    delete frame;
+
+    EV << "Sending ProbeResponse frame\n";
+    Ieee80211HaLowProbeResponseFrame *resp = new Ieee80211HaLowProbeResponseFrame("ProbeResp");
+    Ieee80211ProbeResponseFrameBody& body = resp->getBody();
+    body.setSSID(ssid.c_str());
+    body.setSupportedRates(supportedRates);
+    body.setBeaconInterval(beaconInterval);
+    body.setChannelNumber(channelNumber);
+    sendManagementFrame(resp, staAddress);
+}
+
+void Ieee80211HaLowMgmtAP::handleProbeResponseFrame(Ieee80211HaLowProbeResponseFrame *frame)
+{
+    dropManagementFrame(frame);
+}
+
+
+
+uint64_t Ieee80211HaLowMgmtAP:: getassociationID(Ieee80211HaLowAuthenticationFrame *frame)
 {
     uint64_t Associationindex;
     static uint8_t STAindex = 0x01;

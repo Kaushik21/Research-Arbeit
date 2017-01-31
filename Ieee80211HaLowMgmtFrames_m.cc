@@ -1,12 +1,11 @@
 /*
  * Ieee80211HaLowMgmtFrames_m.cc
  *
- *  Created on: 10-Jan-2017
+ *  Created on: 24-Jan-2017
  *      Author: KAUSHIK NAGARAJAN
  */
 
-
-
+// Disable warnings about unused variables, empty switch stmts, etc:
 #ifdef _MSC_VER
 #  pragma warning(disable:4101)
 #  pragma warning(disable:4065)
@@ -14,13 +13,11 @@
 
 #include <iostream>
 #include <sstream>
-#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "Ieee80211HaLowMgmtFrames_m.h"
 
 USING_NAMESPACE
 
-//using namespace std;
-
+// Another default rule (prevents compiler from choosing base class' doPacking())
 
 // Another default rule (prevents compiler from choosing base class' doPacking())
 template<typename T>
@@ -33,12 +30,365 @@ void doUnpacking(cCommBuffer *, T& t) {
     throw cRuntimeError("Parsim error: no doUnpacking() function for type %s or its base class (check .msg and _m.cc/h files!)",opp_typename(typeid(t)));
 }
 
-
-
 namespace inet {
 namespace ieee80211 {
 
+// Template rule for outputting std::vector<T> types
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
+{
+    out.put('{');
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin()) {
+            out.put(','); out.put(' ');
+        }
+        out << *it;
+    }
+    out.put('}');
 
+    char buf[32];
+    sprintf(buf, " (size=%u)", (unsigned int)vec.size());
+    out.write(buf, strlen(buf));
+    return out;
+}
+
+// Template rule which fires if a struct or class doesn't have operator<<
+template<typename T>
+inline std::ostream& operator<<(std::ostream& out,const T&) {return out;}
+
+
+
+
+Register_Class(Ieee80211HaLowAuthenticationFrame);
+
+Ieee80211HaLowAuthenticationFrame::Ieee80211HaLowAuthenticationFrame(const char *name, int kind) : Ieee80211AuthenticationFrame::Ieee80211AuthenticationFrame(name,kind)
+{
+    this->setType(ST_AUTHENTICATION);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowAuthenticationFrame::Ieee80211HaLowAuthenticationFrame(const Ieee80211HaLowAuthenticationFrame& other) : Ieee80211AuthenticationFrame::Ieee80211AuthenticationFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowAuthenticationFrame::~Ieee80211HaLowAuthenticationFrame()
+{
+}
+
+Ieee80211HaLowAuthenticationFrame& Ieee80211HaLowAuthenticationFrame::operator=(const Ieee80211HaLowAuthenticationFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowAuthenticationFrame::copy(const Ieee80211HaLowAuthenticationFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowAuthenticationFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowAuthenticationFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211AuthenticationFrameBody& Ieee80211HaLowAuthenticationFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowAuthenticationFrame::setBody(const Ieee80211AuthenticationFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+
+
+
+
+Register_Class(Ieee80211HaLowDeauthenticationFrame);
+
+Ieee80211HaLowDeauthenticationFrame::Ieee80211HaLowDeauthenticationFrame(const char *name, int kind) :  Ieee80211DeauthenticationFrame::Ieee80211DeauthenticationFrame(name,kind)
+{
+    this->setType(ST_DEAUTHENTICATION);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowDeauthenticationFrame::Ieee80211HaLowDeauthenticationFrame(const Ieee80211HaLowDeauthenticationFrame& other) : Ieee80211DeauthenticationFrame::Ieee80211DeauthenticationFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowDeauthenticationFrame::~Ieee80211HaLowDeauthenticationFrame()
+{
+}
+
+Ieee80211HaLowDeauthenticationFrame& Ieee80211HaLowDeauthenticationFrame::operator=(const Ieee80211HaLowDeauthenticationFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowDeauthenticationFrame::copy(const Ieee80211HaLowDeauthenticationFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowDeauthenticationFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowDeauthenticationFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211DeauthenticationFrameBody& Ieee80211HaLowDeauthenticationFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowDeauthenticationFrame::setBody(const Ieee80211DeauthenticationFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+
+Register_Class(Ieee80211HaLowDisassociationFrame);
+
+Ieee80211HaLowDisassociationFrame::Ieee80211HaLowDisassociationFrame(const char *name, int kind) : Ieee80211DisassociationFrame::Ieee80211DisassociationFrame(name,kind)
+{
+    this->setType(ST_DISASSOCIATION);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowDisassociationFrame::Ieee80211HaLowDisassociationFrame(const Ieee80211HaLowDisassociationFrame& other) : Ieee80211DisassociationFrame::Ieee80211DisassociationFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowDisassociationFrame::~Ieee80211HaLowDisassociationFrame()
+{
+}
+
+Ieee80211HaLowDisassociationFrame& Ieee80211HaLowDisassociationFrame::operator=(const Ieee80211HaLowDisassociationFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowDisassociationFrame::copy(const Ieee80211HaLowDisassociationFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowDisassociationFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowDisassociationFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211DisassociationFrameBody& Ieee80211HaLowDisassociationFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowDisassociationFrame::setBody(const Ieee80211DisassociationFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+
+Register_Class(Ieee80211HaLowProbeRequestFrame);
+
+Ieee80211HaLowProbeRequestFrame::Ieee80211HaLowProbeRequestFrame(const char *name, int kind) : Ieee80211ProbeRequestFrame::Ieee80211ProbeRequestFrame(name,kind)
+{
+    this->setType(ST_PROBEREQUEST);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowProbeRequestFrame::Ieee80211HaLowProbeRequestFrame(const Ieee80211HaLowProbeRequestFrame& other) : Ieee80211ProbeRequestFrame::Ieee80211ProbeRequestFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowProbeRequestFrame::~Ieee80211HaLowProbeRequestFrame()
+{
+}
+
+Ieee80211HaLowProbeRequestFrame& Ieee80211HaLowProbeRequestFrame::operator=(const Ieee80211HaLowProbeRequestFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowProbeRequestFrame::copy(const Ieee80211HaLowProbeRequestFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowProbeRequestFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowProbeRequestFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211ProbeRequestFrameBody& Ieee80211HaLowProbeRequestFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowProbeRequestFrame::setBody(const Ieee80211ProbeRequestFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+
+Register_Class(Ieee80211HaLowAssociationRequestFrame);
+
+Ieee80211HaLowAssociationRequestFrame::Ieee80211HaLowAssociationRequestFrame(const char *name, int kind) : Ieee80211AssociationRequestFrame::Ieee80211AssociationRequestFrame(name,kind)
+{
+    this->setType(ST_ASSOCIATIONREQUEST);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowAssociationRequestFrame::Ieee80211HaLowAssociationRequestFrame(const Ieee80211HaLowAssociationRequestFrame& other) : Ieee80211AssociationRequestFrame::Ieee80211AssociationRequestFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowAssociationRequestFrame::~Ieee80211HaLowAssociationRequestFrame()
+{
+}
+
+Ieee80211HaLowAssociationRequestFrame& Ieee80211HaLowAssociationRequestFrame::operator=(const Ieee80211HaLowAssociationRequestFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowAssociationRequestFrame::copy(const Ieee80211HaLowAssociationRequestFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowAssociationRequestFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowAssociationRequestFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211AssociationRequestFrameBody& Ieee80211HaLowAssociationRequestFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowAssociationRequestFrame::setBody(const Ieee80211AssociationRequestFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+Register_Class(Ieee80211HaLowReassociationRequestFrame);
+
+Ieee80211HaLowReassociationRequestFrame::Ieee80211HaLowReassociationRequestFrame(const char *name, int kind) : Ieee80211ReassociationRequestFrame::Ieee80211ReassociationRequestFrame(name,kind)
+{
+    this->setType(ST_REASSOCIATIONREQUEST);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowReassociationRequestFrame::Ieee80211HaLowReassociationRequestFrame(const Ieee80211HaLowReassociationRequestFrame& other) : Ieee80211ReassociationRequestFrame::Ieee80211ReassociationRequestFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowReassociationRequestFrame::~Ieee80211HaLowReassociationRequestFrame()
+{
+}
+
+Ieee80211HaLowReassociationRequestFrame& Ieee80211HaLowReassociationRequestFrame::operator=(const Ieee80211HaLowReassociationRequestFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowReassociationRequestFrame::copy(const Ieee80211HaLowReassociationRequestFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowReassociationRequestFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowReassociationRequestFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211ReassociationRequestFrameBody& Ieee80211HaLowReassociationRequestFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowReassociationRequestFrame::setBody(const Ieee80211ReassociationRequestFrameBody& body)
+{
+    this->body_var = body;
+}
 
 
 Register_Class(Ieee80211HaLowAssociationResponseFrameBody);
@@ -82,8 +432,9 @@ void Ieee80211HaLowAssociationResponseFrameBody::parsimPack(cCommBuffer *b)
     ::inet::ieee80211::Ieee80211FrameBody::parsimPack(b);
     doPacking(b,this->statusCode_var);
     doPacking(b,this->aid_var);
-    doPacking(b,this->supportedRates_var);
     doPacking(b,this->AssociationID_var);
+    doPacking(b,this->supportedRates_var);
+
 }
 
 void Ieee80211HaLowAssociationResponseFrameBody::parsimUnpack(cCommBuffer *b)
@@ -91,8 +442,9 @@ void Ieee80211HaLowAssociationResponseFrameBody::parsimUnpack(cCommBuffer *b)
     ::inet::ieee80211::Ieee80211FrameBody::parsimUnpack(b);
     doUnpacking(b,this->statusCode_var);
     doUnpacking(b,this->aid_var);
-    doUnpacking(b,this->supportedRates_var);
     doUnpacking(b,this->AssociationID_var);
+    doUnpacking(b,this->supportedRates_var);
+
 
 }
 
@@ -292,7 +644,11 @@ std::string Ieee80211HaLowAssociationResponseFrameBodyDescriptor::getFieldAsStri
     switch (field) {
         case 0: return long2string(pp->getStatusCode());
         case 1: return long2string(pp->getAid());
-        case 2: {std::stringstream out; out << pp->getSupportedRates(); return out.str();}
+        case 2: {
+            std::stringstream out;
+        out << pp->getSupportedRates();
+        return out.str();
+        }
         case 3: return uint642string(pp->getassociationID());
         //case 3: return long2string(pp->getassociationID());
         default: return "";
@@ -346,12 +702,11 @@ void *Ieee80211HaLowAssociationResponseFrameBodyDescriptor::getFieldStructPointe
 }
 
 
-
 Register_Class(Ieee80211HaLowAssociationResponseFrame);
 
 Ieee80211HaLowAssociationResponseFrame::Ieee80211HaLowAssociationResponseFrame(const char *name, int kind) : ::inet::ieee80211::Ieee80211ManagementFrame(name,kind)
 {
-    this->setType(ST_ASSOCIATIONREQUEST);
+    this->setType(ST_ASSOCIATIONRESPONSE);
     this->setByteLength(18+getBody().getBodyLength());
 
 }
@@ -399,6 +754,8 @@ void Ieee80211HaLowAssociationResponseFrame::setBody(const Ieee80211HaLowAssocia
 {
     this->body_var = body;
 }
+
+
 
 class Ieee80211HaLowAssociationResponseFrameDescriptor : public cClassDescriptor
 {
@@ -537,9 +894,9 @@ std::string Ieee80211HaLowAssociationResponseFrameDescriptor::getFieldAsString(v
     }
     Ieee80211HaLowAssociationResponseFrame *pp = (Ieee80211HaLowAssociationResponseFrame *)object; (void)pp;
     switch (field) {
-            case 0: {std::stringstream out; out << pp->getBody(); return out.str();}
-            default: return "";
-        }
+        case 0: {std::stringstream out; out << pp->getBody(); return out.str();}
+        default: return "";
+    }
 }
 
 bool Ieee80211HaLowAssociationResponseFrameDescriptor::setFieldAsString(void *object, int field, int i, const char *value) const
@@ -586,5 +943,225 @@ void *Ieee80211HaLowAssociationResponseFrameDescriptor::getFieldStructPointer(vo
 }
 
 
+
+Register_Class(Ieee80211HaLowReassociationResponseFrame);
+
+Ieee80211HaLowReassociationResponseFrame::Ieee80211HaLowReassociationResponseFrame(const char *name, int kind) : Ieee80211ReassociationResponseFrame::Ieee80211ReassociationResponseFrame(name,kind)
+{
+    this->setType(ST_REASSOCIATIONRESPONSE);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowReassociationResponseFrame::Ieee80211HaLowReassociationResponseFrame(const Ieee80211HaLowReassociationResponseFrame& other) : Ieee80211ReassociationResponseFrame::Ieee80211ReassociationResponseFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowReassociationResponseFrame::~Ieee80211HaLowReassociationResponseFrame()
+{
+}
+
+Ieee80211HaLowReassociationResponseFrame& Ieee80211HaLowReassociationResponseFrame::operator=(const Ieee80211HaLowReassociationResponseFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowReassociationResponseFrame::copy(const Ieee80211HaLowReassociationResponseFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowReassociationResponseFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowReassociationResponseFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211ReassociationResponseFrameBody& Ieee80211HaLowReassociationResponseFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowReassociationResponseFrame::setBody(const Ieee80211ReassociationResponseFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+
+Register_Class(Ieee80211HaLowBeaconFrame);
+
+Ieee80211HaLowBeaconFrame::Ieee80211HaLowBeaconFrame(const char *name, int kind) : Ieee80211BeaconFrame::Ieee80211BeaconFrame(name,kind)
+{
+    this->setType(ST_BEACON);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowBeaconFrame::Ieee80211HaLowBeaconFrame(const Ieee80211HaLowBeaconFrame& other) : Ieee80211BeaconFrame::Ieee80211BeaconFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowBeaconFrame::~Ieee80211HaLowBeaconFrame()
+{
+}
+
+Ieee80211HaLowBeaconFrame& Ieee80211HaLowBeaconFrame::operator=(const Ieee80211HaLowBeaconFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowBeaconFrame::copy(const Ieee80211HaLowBeaconFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowBeaconFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowBeaconFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211BeaconFrameBody& Ieee80211HaLowBeaconFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowBeaconFrame::setBody(const Ieee80211BeaconFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+Register_Class(Ieee80211HaLowProbeResponseFrame);
+
+Ieee80211HaLowProbeResponseFrame::Ieee80211HaLowProbeResponseFrame(const char *name, int kind) : Ieee80211ProbeResponseFrame::Ieee80211ProbeResponseFrame(name,kind)
+{
+    this->setType(ST_PROBERESPONSE);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowProbeResponseFrame::Ieee80211HaLowProbeResponseFrame(const Ieee80211HaLowProbeResponseFrame& other) : Ieee80211ProbeResponseFrame::Ieee80211ProbeResponseFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowProbeResponseFrame::~Ieee80211HaLowProbeResponseFrame()
+{
+}
+
+Ieee80211HaLowProbeResponseFrame& Ieee80211HaLowProbeResponseFrame::operator=(const Ieee80211HaLowProbeResponseFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowProbeResponseFrame::copy(const Ieee80211HaLowProbeResponseFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowProbeResponseFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowProbeResponseFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211ProbeResponseFrameBody& Ieee80211HaLowProbeResponseFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowProbeResponseFrame::setBody(const Ieee80211ProbeResponseFrameBody& body)
+{
+    this->body_var = body;
+}
+
+
+
+Register_Class(Ieee80211HaLowActionFrame);
+
+Ieee80211HaLowActionFrame::Ieee80211HaLowActionFrame(const char *name, int kind) : Ieee80211ActionFrame::Ieee80211ActionFrame(name,kind)
+{
+    this->setType(ST_ACTION);
+    this->setByteLength(18+getBody().getBodyLength());
+
+}
+
+Ieee80211HaLowActionFrame::Ieee80211HaLowActionFrame(const Ieee80211HaLowActionFrame& other) : Ieee80211ActionFrame::Ieee80211ActionFrame(other)
+{
+    copy(other);
+}
+
+Ieee80211HaLowActionFrame::~Ieee80211HaLowActionFrame()
+{
+}
+
+Ieee80211HaLowActionFrame& Ieee80211HaLowActionFrame::operator=(const Ieee80211HaLowActionFrame& other)
+{
+    if (this==&other) return *this;
+    ::inet::ieee80211::Ieee80211ManagementFrame::operator=(other);
+    copy(other);
+    return *this;
+}
+
+void Ieee80211HaLowActionFrame::copy(const Ieee80211HaLowActionFrame& other)
+{
+    this->body_var = other.body_var;
+}
+
+void Ieee80211HaLowActionFrame::parsimPack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimPack(b);
+    doPacking(b,this->body_var);
+}
+
+void Ieee80211HaLowActionFrame::parsimUnpack(cCommBuffer *b)
+{
+    ::inet::ieee80211::Ieee80211ManagementFrame::parsimUnpack(b);
+    doUnpacking(b,this->body_var);
+}
+
+Ieee80211ActionFrameBody& Ieee80211HaLowActionFrame::getBody()
+{
+    return body_var;
+}
+
+void Ieee80211HaLowActionFrame::setBody(const Ieee80211ActionFrameBody& body)
+{
+    this->body_var = body;
+}
+
 }//ieee80211
 }//inet
+
+
